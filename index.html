@@ -268,12 +268,14 @@ function sendHeight() {
   window.parent.postMessage({ iframeHeight: height }, '*');
 }
 
-// Send height on load
+// Send height when page loads
 window.addEventListener('load', sendHeight);
 
-// Send height if window resizes (for mobile or responsive layout)
+// Send height on resize (orientation change, responsive adjustments)
 window.addEventListener('resize', sendHeight);
 </script>
+
 </body>
 </html>
+
 
