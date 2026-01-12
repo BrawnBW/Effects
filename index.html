@@ -13,13 +13,17 @@
 <link rel="preload" as="image" href="assets/images/prismflake.png">
 
 <style>
-body {
+html, body {
   margin: 0;
-  font-family: Arial, sans-serif;
+  padding: 0;
+  height: auto;
+  overflow: visible;
   background: #111;
   color: #fff;
+  font-family: Arial, sans-serif;
 }
 
+/* Showcase container */
 .showcase {
   display: grid;
   grid-template-columns: 1fr;
@@ -48,7 +52,6 @@ body {
   background: #111;
 }
 
-/* Stacked images for wipe */
 .image-display img {
   position: absolute;
   top: 0;
@@ -77,6 +80,190 @@ body {
 
 /* Effects list */
 .effects-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.effect-item {
+  padding: 12px 16px;
+  cursor: pointer;
+  border-left: 4px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.effect-item:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.effect-item.active {
+  border-left-color: #ff3c00;
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.effect-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.effect-description {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  color: #ccc;
+  margin-top: 6px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.effect-item.active .effect-description {
+  max-height: 200px;
+}
+
+/* Mobile adjustments */
+@media (max-width: 767px) {
+  .showcase {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 32px 16px;
+    height: auto;
+  }
+
+  .image-display {
+    aspect-ratio: auto;
+    height: auto;
+  }
+
+  .image-display img {
+    width: 100%;
+    height: 100%;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="showcase">
+  <div class="image-display">
+    <img id="oldImage" src="assets/images/chrome.png" alt="Old Image">
+    <img id="newImage" src="assets/images/chrome.png" alt="New Image">
+    <div class="halftone-overlay"></div>
+  </div>
+
+  <div class="effects-list">
+    <div class="effect-item active" data-image="assets/images/chrome.png">
+      <div class="effect-title">Chrome</div>
+      <div class="effect-description">
+        High-gloss chrome finish with strong visual impact.
+      </div>
+    </div>
+
+    <div class="effect-item" data-image="assets/images/holo.png">
+      <div class="effect-title">Holographic</div>
+      <div class="effect-description">
+        Color-shifting holographic effect under different light angles.
+      </div>
+    </div>
+
+    <div class="effect-item" data-image="assets/images/goldflake.png">
+      <div class="effect-title">Gold Flake</div>
+      <div class="effect-description">
+        Metallic flake embedded for premium depth and sparkle.
+      </div>
+    </div>
+
+    <div class="effect-item" data-image="assets/images/silverflake.png">
+      <div class="effect-title">Silver Flake</div>
+      <div class="effect-description">
+        Subtle silver flake finish for a metallic shimmer effect.
+      </div>
+    </div>
+
+    <div class="effect-item" data-image="assets/images/prismflake.png">
+      <div class="effect-title">Prismatic Flake</div>
+      <div class="effect-description">
+        Multi-color prism flake creates a sparkling, rainbow-like effect.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const items = Array.from(document.querySelectorAll('.effect-item'));
+const oldImage = document.getElementById('oldImage');
+const newImage = document.getElementById('newImage');
+const halftone = document.querySelector('.halftone-overlay');
+
+let currentIndex = 0;
+let transitioning = false;
+
+items.forEach((item, index) => {
+  item.addEventListener('click', () => {
+    if (item.classList.contains('active') || transitioning) return;
+    transitioning = true;
+
+    items.forEach(i => i.classList.remove('active'));
+    item.classList.add('active');
+
+    const newSrc = item.dataset.image;
+    const direction = index > currentIndex ? 1 : -1;
+
+    // Load new image
+    newImage.src = newSrc;
+
+    oldImage.style.clipPath = 'inset(0 0 0 0)';
+    newImage.style.transform = 'scale(1.02)';
+
+    halftone.style.opacity = 1;
+
+    requestAnimationFrame(() => {
+      oldImage.style.transition = 'clip-path 0.4s ease-in-out';
+      oldImage.style.clipPath = direction === 1 ? 'inset(0 100% 0 0)' : 'inset(0 0 0 100%)';
+    });
+
+    setTimeout(() => {
+      oldImage.src = newSrc;
+      oldImage.style.clipPath = 'inset(0 0 0 0)';
+      oldImage.style.transition = '';
+      newImage.style.transform = 'scale(1)';
+      halftone.style.opacity = 0;
+      currentIndex = index;
+
+      // Update height for parent iframe
+      if(window.parent) {
+        window.parent.postMessage({ iframeHeight: document.body.scrollHeight }, '*');
+      }
+
+      transitioning = false;
+    }, 400);
+  });
+});
+
+// Send height on load & resize
+function sendHeight() {
+  if(window.parent) {
+    window.parent.postMessage({ iframeHeight: document.body.scrollHeight }, '*');
+  }
+}
+window.addEventListener('load', sendHeight);
+window.addEventListener('resize', sendHeight);
+
+// Also after all images loaded
+const images = document.querySelectorAll('img');
+let loadedCount = 0;
+images.forEach(img => {
+  if(img.complete) loadedCount++;
+  else img.addEventListener('load', () => {
+    loadedCount++;
+    if(loadedCount === images.length) sendHeight();
+  });
+});
+</script>
+
+</body>
+</html>
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -277,5 +464,6 @@ window.addEventListener('resize', sendHeight);
 
 </body>
 </html>
+
 
 
