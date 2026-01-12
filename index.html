@@ -16,7 +16,7 @@
   body {
     margin: 0;
     font-family: Arial, sans-serif;
-    background: #111; /* dark background like screenshot */
+    background: #111;
     color: #fff;
   }
 
@@ -27,7 +27,6 @@
     padding: 48px 24px;
     max-width: 1200px;
     margin: auto;
-    background: #111 url('') no-repeat center/cover; /* optional halftone overlay if available */
     border-radius: 8px;
   }
 
@@ -39,23 +38,44 @@
   }
 
   .image-display {
+    position: relative;
     width: 100%;
     aspect-ratio: 4 / 3;
     overflow: hidden;
     border-radius: 8px;
-    box-shadow: 0 0 20px rgba(0,0,0,0.6); /* subtle shadow to pop against dark background */
+    box-shadow: 0 0 20px rgba(0,0,0,0.6);
+    background: #111;
   }
 
   .image-display img {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: opacity 0.35s ease-in-out;
-    display: block;
+    transition: transform 0.35s ease-in-out, box-shadow 0.35s ease, scale 0.35s ease;
   }
 
-  .image-display img.fade-out {
+  /* Halftone overlay */
+  .halftone-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px);
+    background-size: 10px 10px;
     opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    z-index: 1;
+  }
+
+  /* 3D slide effect */
+  .image-slide-active {
+    transform: scale(1.02);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.6);
   }
 
   .effects-list {
@@ -76,7 +96,7 @@
   }
 
   .effect-item.active {
-    border-left-color: #ff3c00; /* brand accent */
+    border-left-color: #ff3c00;
     background-color: rgba(255, 255, 255, 0.08);
   }
 
@@ -100,7 +120,6 @@
     max-height: 200px;
   }
 
-  /* Mobile-friendly spacing */
   @media (max-width: 767px) {
     .showcase {
       padding: 32px 16px;
@@ -108,7 +127,6 @@
     }
   }
 
-  /* Optional: limit image width on very large screens */
   @media (min-width: 1200px) {
     .image-display {
       max-width: 800px;
@@ -122,13 +140,9 @@
 
 <div class="showcase">
   <div class="image-display">
-    <img
-      id="mainImage"
-      src="assets/images/chrome.png"
-      alt="Effect Detail"
-      loading="eager"
-      decoding="async"
-    >
+    <img id="currentImage" src="assets/images/chrome.png" alt="Effect Detail" loading="eager" decoding="async">
+    <img id="nextImage" src="" alt="" style="display: none;">
+    <div class="halftone-overlay"></div>
   </div>
 
   <div class="effects-list">
@@ -170,12 +184,15 @@
 </div>
 
 <script>
-  const items = document.querySelectorAll('.effect-item');
-  const mainImage = document.getElementById('mainImage');
+  const items = Array.from(document.querySelectorAll('.effect-item'));
+  const currentImage = document.getElementById('currentImage');
+  const nextImage = document.getElementById('nextImage');
+  const halftone = document.querySelector('.halftone-overlay');
 
   let transitioning = false;
+  let currentIndex = 0;
 
-  items.forEach(item => {
+  items.forEach((item, index) => {
     item.addEventListener('click', () => {
       if (item.classList.contains('active') || transitioning) return;
       transitioning = true;
@@ -184,20 +201,44 @@
       item.classList.add('active');
 
       const newSrc = item.dataset.image;
+      const direction = index > currentIndex ? 1 : -1;
 
-      mainImage.classList.add('fade-out');
+      nextImage.src = newSrc;
+      nextImage.style.display = 'block';
+
+      // Position next image
+      nextImage.style.transform = `translateX(${100 * direction}%)`;
+      currentImage.style.transform = 'translateX(0)';
+
+      // Fade in halftone
+      halftone.style.opacity = 1;
+
+      // Apply 3D slide effect
+      currentImage.classList.add('image-slide-active');
+      nextImage.classList.add('image-slide-active');
+
+      // Trigger slide
+      requestAnimationFrame(() => {
+        currentImage.style.transform = `translateX(${-100 * direction}%) scale(1)`;
+        nextImage.style.transform = `translateX(0) scale(1)`;
+      });
 
       setTimeout(() => {
-        mainImage.src = newSrc;
-        mainImage.onload = () => {
-          mainImage.classList.remove('fade-out');
-          transitioning = false;
-        };
-      }, 200);
+        currentImage.src = newSrc;
+        currentImage.style.transform = 'translateX(0)';
+        nextImage.style.display = 'none';
+        currentImage.classList.remove('image-slide-active');
+        nextImage.classList.remove('image-slide-active');
+
+        // Fade out halftone
+        halftone.style.opacity = 0;
+
+        currentIndex = index;
+        transitioning = false;
+      }, 350); // matches CSS transition
     });
   });
 </script>
 
 </body>
 </html>
-
