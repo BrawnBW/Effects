@@ -16,7 +16,7 @@
 html, body {
   margin: 0;
   padding: 0;
-  min-height: 1200px; /* enough for desktop + mobile stacked */
+  min-height: 1300px; /* ensure iframe tall enough for mobile + stacked images */
   background: #111;
   color: #fff;
   font-family: Arial, sans-serif;
@@ -32,6 +32,14 @@ html, body {
   border-radius: 8px;
 }
 
+@media (max-width: 767px) {
+  .showcase {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 32px 16px;
+  }
+}
+
 /* Image container */
 .image-display {
   position: relative;
@@ -44,9 +52,14 @@ html, body {
 }
 
 .image-display img {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: clip-path 0.4s ease-in-out;
+  z-index: 0;
 }
 
 /* Halftone overlay */
@@ -59,7 +72,8 @@ html, body {
   pointer-events: none;
   background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px);
   background-size: 10px 10px;
-  opacity: 0.5;
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
   z-index: 2;
 }
 
@@ -105,67 +119,80 @@ html, body {
 .effect-item.active .effect-description {
   max-height: 400px;
 }
-
-/* Mobile adjustments */
-@media (max-width: 767px) {
-  .showcase {
-    grid-template-columns: 1fr;
-    gap: 16px;
-    padding: 32px 16px;
-  }
-
-  .image-display {
-    aspect-ratio: auto;
-    height: auto;
-  }
-
-  .effects-list {
-    max-height: none;
-    overflow: visible;
-  }
-}
 </style>
 </head>
 
 <body>
 <div class="showcase">
   <div class="image-display">
-    <img src="assets/images/chrome.png" alt="Chrome">
+    <img id="oldImage" src="assets/images/chrome.png" alt="Old Image">
+    <img id="newImage" src="assets/images/chrome.png" alt="New Image">
     <div class="halftone-overlay"></div>
   </div>
 
   <div class="effects-list">
     <div class="effect-item active" data-image="assets/images/chrome.png">
       <div class="effect-title">Chrome</div>
-      <div class="effect-description">
-        High-gloss chrome finish with strong visual impact.
-      </div>
+      <div class="effect-description">High-gloss chrome finish with strong visual impact.</div>
     </div>
     <div class="effect-item" data-image="assets/images/holo.png">
       <div class="effect-title">Holographic</div>
-      <div class="effect-description">
-        Color-shifting holographic effect under different light angles.
-      </div>
+      <div class="effect-description">Color-shifting holographic effect under different light angles.</div>
     </div>
     <div class="effect-item" data-image="assets/images/goldflake.png">
       <div class="effect-title">Gold Flake</div>
-      <div class="effect-description">
-        Metallic flake embedded for premium depth and sparkle.
-      </div>
+      <div class="effect-description">Metallic flake embedded for premium depth and sparkle.</div>
     </div>
     <div class="effect-item" data-image="assets/images/silverflake.png">
       <div class="effect-title">Silver Flake</div>
-      <div class="effect-description">
-        Subtle silver flake finish for a metallic shimmer effect.
-      </div>
+      <div class="effect-description">Subtle silver flake finish for a metallic shimmer effect.</div>
     </div>
     <div class="effect-item" data-image="assets/images/prismflake.png">
       <div class="effect-title">Prismatic Flake</div>
-      <div class="effect-description">
-        Multi-color prism flake creates a sparkling, rainbow-like effect.
-      </div>
+      <div class="effect-description">Multi-color prism flake creates a sparkling, rainbow-like effect.</div>
     </div>
   </div>
 </div>
+
+<script>
+const items = Array.from(document.querySelectorAll('.effect-item'));
+const oldImage = document.getElementById('oldImage');
+const newImage = document.getElementById('newImage');
+const halftone = document.querySelector('.halftone-overlay');
+
+let currentIndex = 0;
+let transitioning = false;
+
+items.forEach((item, index) => {
+  item.addEventListener('click', () => {
+    if (item.classList.contains('active') || transitioning) return;
+    transitioning = true;
+
+    items.forEach(i => i.classList.remove('active'));
+    item.classList.add('active');
+
+    const newSrc = item.dataset.image;
+    const direction = index > currentIndex ? 1 : -1;
+
+    newImage.src = newSrc;
+    oldImage.style.clipPath = 'inset(0 0 0 0)';
+    halftone.style.opacity = 1;
+
+    requestAnimationFrame(() => {
+      oldImage.style.transition = 'clip-path 0.4s ease-in-out';
+      oldImage.style.clipPath = direction === 1 ? 'inset(0 100% 0 0)' : 'inset(0 0 0 100%)';
+    });
+
+    setTimeout(() => {
+      oldImage.src = newSrc;
+      oldImage.style.clipPath = 'inset(0 0 0 0)';
+      oldImage.style.transition = '';
+      halftone.style.opacity = 0;
+      currentIndex = index;
+      transitioning = false;
+    }, 450);
+  });
+});
+</script>
 </body>
 </html>
