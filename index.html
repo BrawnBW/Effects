@@ -13,143 +13,124 @@
 <link rel="preload" as="image" href="assets/images/prismflake.png">
 
 <style>
-  body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: #111;
-    color: #fff;
-  }
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #111;
+  color: #fff;
+}
 
+.showcase {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  padding: 48px 24px;
+  max-width: 1200px;
+  margin: auto;
+  border-radius: 8px;
+}
+
+@media (min-width: 768px) {
   .showcase {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 24px;
-    padding: 48px 24px;
-    max-width: 1200px;
-    margin: auto;
-    border-radius: 8px;
+    grid-template-columns: 60% 40%;
+    gap: 32px;
   }
+}
 
-  @media (min-width: 768px) {
-    .showcase {
-      grid-template-columns: 60% 40%;
-      gap: 32px;
-    }
+/* Image container */
+.image-display {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: 8px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.6);
+  background: #111;
+}
+
+/* Both images stacked */
+.image-display img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: clip-path 0.4s ease-in-out, transform 0.35s ease-in-out;
+  z-index: 0;
+}
+
+/* Halftone overlay */
+.halftone-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px);
+  background-size: 10px 10px;
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+  z-index: 2;
+}
+
+/* Effects list */
+.effects-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.effect-item {
+  padding: 12px 16px;
+  cursor: pointer;
+  border-left: 4px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.effect-item:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.effect-item.active {
+  border-left-color: #ff3c00;
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.effect-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.effect-description {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  color: #ccc;
+  margin-top: 6px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.effect-item.active .effect-description {
+  max-height: 200px;
+}
+
+@media (max-width: 767px) {
+  .showcase {
+    padding: 32px 16px;
+    gap: 16px;
   }
+}
 
-  /* Image container */
+@media (min-width: 1200px) {
   .image-display {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 4 / 3;
-    overflow: hidden;
-    border-radius: 8px;
-    box-shadow: 0 0 20px rgba(0,0,0,0.6);
-    background: #111;
+    max-width: 800px;
+    margin: auto;
   }
-
-  .image-display img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    position: absolute;
-    top: 0;
-    left: 0;
-    transition: transform 0.35s ease-in-out;
-    z-index: 0;
-  }
-
-  /* Wipe overlay for sliding effect */
-  .image-display::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 0%;
-    height: 100%;
-    background: #111;
-    z-index: 1;
-    transition: width 0.35s ease-in-out;
-  }
-
-  /* Halftone overlay */
-  .halftone-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px);
-    background-size: 10px 10px;
-    opacity: 0;
-    transition: opacity 0.5s ease-in-out;
-    z-index: 2;
-  }
-
-  /* Effects list */
-  .effects-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .effect-item {
-    padding: 12px 16px;
-    cursor: pointer;
-    border-left: 4px solid transparent;
-    transition: all 0.3s ease;
-  }
-
-  .effect-item:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-  }
-
-  .effect-item.active {
-    border-left-color: #ff3c00;
-    background-color: rgba(255, 255, 255, 0.08);
-  }
-
-  .effect-title {
-    font-size: 18px;
-    font-weight: 700;
-    color: #fff;
-  }
-
-  .effect-description {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.3s ease;
-    color: #ccc;
-    margin-top: 6px;
-    font-size: 14px;
-    line-height: 1.4;
-  }
-
-  .effect-item.active .effect-description {
-    max-height: 200px;
-  }
-
-  /* Optional scaling/3D pop effect */
-  .pop {
-    transform: scale(1.02);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.6);
-  }
-
-  @media (max-width: 767px) {
-    .showcase {
-      padding: 32px 16px;
-      gap: 16px;
-    }
-  }
-
-  @media (min-width: 1200px) {
-    .image-display {
-      max-width: 800px;
-      margin: auto;
-    }
-  }
+}
 </style>
 </head>
 
@@ -157,7 +138,9 @@
 
 <div class="showcase">
   <div class="image-display">
-    <img id="mainImage" src="assets/images/chrome.png" alt="Effect Detail" loading="eager" decoding="async">
+    <!-- Two stacked images -->
+    <img id="oldImage" src="assets/images/chrome.png" alt="Old Image">
+    <img id="newImage" src="assets/images/chrome.png" alt="New Image">
     <div class="halftone-overlay"></div>
   </div>
 
@@ -201,9 +184,9 @@
 
 <script>
 const items = Array.from(document.querySelectorAll('.effect-item'));
-const mainImage = document.getElementById('mainImage');
+const oldImage = document.getElementById('oldImage');
+const newImage = document.getElementById('newImage');
 const halftone = document.querySelector('.halftone-overlay');
-const overlay = document.querySelector('.image-display::before'); // pseudo-element
 
 let currentIndex = 0;
 let transitioning = false;
@@ -219,27 +202,36 @@ items.forEach((item, index) => {
     const newSrc = item.dataset.image;
     const direction = index > currentIndex ? 1 : -1;
 
-    // Apply pop effect & halftone
-    mainImage.classList.add('pop');
+    // Load new image in place
+    newImage.src = newSrc;
+
+    // Reset old image clip-path
+    oldImage.style.clipPath = 'inset(0 0 0 0)';
+    newImage.style.transform = 'scale(1.02)';
+
+    // Fade in halftone
     halftone.style.opacity = 1;
 
-    // Create sliding effect using transform
-    mainImage.style.transform = `translateX(${100 * direction}%) scale(1.02)`;
-
-    // Delay slightly for smooth animation
+    // Animate old image wipe depending on direction
     requestAnimationFrame(() => {
-      mainImage.style.transition = 'transform 0.35s ease-in-out';
-      mainImage.style.transform = 'translateX(0) scale(1)';
+      oldImage.style.transition = 'clip-path 0.4s ease-in-out';
+      if(direction === 1){
+        oldImage.style.clipPath = 'inset(0 100% 0 0)'; // wipe left-to-right
+      } else {
+        oldImage.style.clipPath = 'inset(0 0 0 100%)'; // wipe right-to-left
+      }
     });
 
+    // After animation completes
     setTimeout(() => {
-      mainImage.src = newSrc;
-      mainImage.style.transform = 'translateX(0) scale(1)';
-      mainImage.classList.remove('pop');
+      oldImage.src = newSrc;
+      oldImage.style.clipPath = 'inset(0 0 0 0)';
+      oldImage.style.transition = '';
+      newImage.style.transform = 'scale(1)';
       halftone.style.opacity = 0;
       currentIndex = index;
       transitioning = false;
-    }, 350);
+    }, 400); // match clip-path transition
   });
 });
 </script>
