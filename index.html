@@ -48,7 +48,7 @@ body {
   background: #111;
 }
 
-/* Both images stacked */
+/* Stacked images for wipe */
 .image-display img {
   position: absolute;
   top: 0;
@@ -127,7 +127,7 @@ body {
 /* Mobile-friendly adjustments */
 @media (max-width: 767px) {
   .showcase {
-    grid-template-columns: 1fr; /* stack image + text vertically */
+    grid-template-columns: 1fr; /* stack vertically */
     gap: 16px;
     padding: 32px 16px;
   }
@@ -141,13 +141,14 @@ body {
   .image-display {
     width: 100%;
     max-width: 100%;
-    aspect-ratio: auto; /* allow height to adjust naturally */
+    aspect-ratio: 4 / 3; /* maintain height for absolute images */
   }
 
   .image-display img {
     width: 100%;
-    height: auto;
+    height: 100%; /* fill container */
     object-fit: cover;
+    position: absolute; /* preserve stacking for wipe effect */
   }
 }
 
