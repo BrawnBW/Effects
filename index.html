@@ -1,14 +1,88 @@
-<!-- Preload primary images -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Effects Showcase</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- Preload images -->
 <link rel="preload" as="image" href="assets/images/chrome.png">
 <link rel="preload" as="image" href="assets/images/holo.png">
 <link rel="preload" as="image" href="assets/images/gold-flake.png">
+
+<style>
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f4f4f4;
+  }
+
+  .showcase {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+    padding: 24px;
+    max-width: 1200px;
+    margin: auto;
+    background: #fff;
+  }
+
+  @media (min-width: 768px) {
+    .showcase {
+      grid-template-columns: 60% 40%;
+    }
+  }
+
+  .image-display {
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border-radius: 8px;
+  }
+
+  .image-display img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity 0.35s ease-in-out;
+  }
+
+  .image-display img.fade-out {
+    opacity: 0;
+  }
+
+  .effect-item {
+    border-bottom: 1px solid #ddd;
+    padding: 16px 0;
+    cursor: pointer;
+  }
+
+  .effect-title {
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  .effect-description {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    color: #555;
+    margin-top: 8px;
+  }
+
+  .effect-item.active .effect-description {
+    max-height: 200px;
+  }
+</style>
+</head>
+
+<body>
 
 <div class="showcase">
   <div class="image-display">
     <img
       id="mainImage"
       src="assets/images/chrome.png"
-      alt="Product Effect Detail"
+      alt="Effect Detail"
       loading="eager"
       decoding="async"
     >
@@ -16,27 +90,57 @@
 
   <div class="effects-list">
     <div class="effect-item active" data-image="assets/images/chrome.png">
-      <div class="effect-title">Gloss Finish</div>
+      <div class="effect-title">Chrome</div>
       <div class="effect-description">
-        High-gloss laminate that enhances color depth while protecting against
-        UV fade, scratches, and trail debris.
+        High-gloss chrome finish with strong visual impact.
       </div>
     </div>
 
     <div class="effect-item" data-image="assets/images/holo.png">
-      <div class="effect-title">Matte Protection</div>
+      <div class="effect-title">Holographic</div>
       <div class="effect-description">
-        Reduces glare and fingerprints while maintaining a rugged, factory look
-        with added surface durability.
+        Color-shifting holographic effect under different light angles.
       </div>
     </div>
 
     <div class="effect-item" data-image="assets/images/gold-flake.png">
-      <div class="effect-title">Textured Grip</div>
+      <div class="effect-title">Gold Flake</div>
       <div class="effect-description">
-        Engineered texture adds grip in high-wear areas, ideal for aggressive
-        riding conditions.
+        Metallic flake embedded for premium depth and sparkle.
       </div>
     </div>
   </div>
 </div>
+
+<script>
+  const items = document.querySelectorAll('.effect-item');
+  const mainImage = document.getElementById('mainImage');
+
+  let transitioning = false;
+
+  items.forEach(item => {
+    item.addEventListener('click', () => {
+      if (item.classList.contains('active') || transitioning) return;
+
+      transitioning = true;
+
+      items.forEach(i => i.classList.remove('active'));
+      item.classList.add('active');
+
+      const newSrc = item.dataset.image;
+
+      mainImage.classList.add('fade-out');
+
+      setTimeout(() => {
+        mainImage.src = newSrc;
+        mainImage.onload = () => {
+          mainImage.classList.remove('fade-out');
+          transitioning = false;
+        };
+      }, 200);
+    });
+  });
+</script>
+
+</body>
+</html>
