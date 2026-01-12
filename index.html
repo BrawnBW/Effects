@@ -118,10 +118,36 @@ body {
   max-height: 200px;
 }
 
+/* Optional scaling/3D pop effect */
+.pop {
+  transform: scale(1.02);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+}
+
+/* Mobile-friendly adjustments */
 @media (max-width: 767px) {
   .showcase {
-    padding: 32px 16px;
+    grid-template-columns: 1fr; /* stack image + text vertically */
     gap: 16px;
+    padding: 32px 16px;
+  }
+
+  .effects-list {
+    max-height: none; /* remove height restriction */
+    overflow: visible; /* all items visible */
+    flex-direction: column;
+  }
+
+  .image-display {
+    width: 100%;
+    max-width: 100%;
+    aspect-ratio: auto; /* allow height to adjust naturally */
+  }
+
+  .image-display img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
   }
 }
 
@@ -138,7 +164,7 @@ body {
 
 <div class="showcase">
   <div class="image-display">
-    <!-- Two stacked images -->
+    <!-- Two stacked images for wipe effect -->
     <img id="oldImage" src="assets/images/chrome.png" alt="Old Image">
     <img id="newImage" src="assets/images/chrome.png" alt="New Image">
     <div class="halftone-overlay"></div>
