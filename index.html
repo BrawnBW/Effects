@@ -8,7 +8,9 @@
 <!-- Preload images -->
 <link rel="preload" as="image" href="assets/images/chrome.png">
 <link rel="preload" as="image" href="assets/images/holo.png">
-<link rel="preload" as="image" href="assets/images/gold-flake.png">
+<link rel="preload" as="image" href="assets/images/goldflake.png">
+<link rel="preload" as="image" href="assets/images/silverflake.png">
+<link rel="preload" as="image" href="assets/images/prismflake.png">
 
 <style>
   body {
@@ -30,11 +32,13 @@
   @media (min-width: 768px) {
     .showcase {
       grid-template-columns: 60% 40%;
+      gap: 32px;
     }
   }
 
   .image-display {
-    aspect-ratio: 4 / 3;
+    width: 100%;
+    aspect-ratio: 4 / 3;  /* maintains 4:3 ratio */
     overflow: hidden;
     border-radius: 8px;
   }
@@ -44,6 +48,7 @@
     height: 100%;
     object-fit: cover;
     transition: opacity 0.35s ease-in-out;
+    display: block;
   }
 
   .image-display img.fade-out {
@@ -71,6 +76,22 @@
 
   .effect-item.active .effect-description {
     max-height: 200px;
+  }
+
+  /* Optional: mobile-friendly padding */
+  @media (max-width: 767px) {
+    .showcase {
+      padding: 16px;
+      gap: 16px;
+    }
+  }
+
+  /* Optional: limit image width on large screens */
+  @media (min-width: 1200px) {
+    .image-display {
+      max-width: 800px;
+      margin: auto;
+    }
   }
 </style>
 </head>
@@ -103,10 +124,24 @@
       </div>
     </div>
 
-    <div class="effect-item" data-image="assets/images/gold-flake.png">
+    <div class="effect-item" data-image="assets/images/goldflake.png">
       <div class="effect-title">Gold Flake</div>
       <div class="effect-description">
         Metallic flake embedded for premium depth and sparkle.
+      </div>
+    </div>
+
+    <div class="effect-item" data-image="assets/images/silverflake.png">
+      <div class="effect-title">Silver Flake</div>
+      <div class="effect-description">
+        Subtle silver flake finish for a metallic shimmer effect.
+      </div>
+    </div>
+
+    <div class="effect-item" data-image="assets/images/prismflake.png">
+      <div class="effect-title">Prismatic Flake</div>
+      <div class="effect-description">
+        Multi-color prism flake creates a sparkling, rainbow-like effect.
       </div>
     </div>
   </div>
@@ -121,9 +156,9 @@
   items.forEach(item => {
     item.addEventListener('click', () => {
       if (item.classList.contains('active') || transitioning) return;
-
       transitioning = true;
 
+      // Remove active class from all
       items.forEach(i => i.classList.remove('active'));
       item.classList.add('active');
 
