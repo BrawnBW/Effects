@@ -16,8 +16,7 @@
 html, body {
   margin: 0;
   padding: 0;
-  height: auto;
-  overflow: visible;
+  min-height: 1200px; /* enough for desktop + mobile stacked */
   background: #111;
   color: #fff;
   font-family: Arial, sans-serif;
@@ -25,19 +24,12 @@ html, body {
 
 .showcase {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 24px;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
   padding: 48px 24px;
   max-width: 1200px;
   margin: auto;
   border-radius: 8px;
-}
-
-@media (min-width: 768px) {
-  .showcase {
-    grid-template-columns: 60% 40%;
-    gap: 32px;
-  }
 }
 
 /* Image container */
@@ -52,16 +44,12 @@ html, body {
 }
 
 .image-display img {
-  position: absolute;
-  top: 0;
-  left: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: clip-path 0.4s ease-in-out, transform 0.35s ease-in-out;
-  z-index: 0;
 }
 
+/* Halftone overlay */
 .halftone-overlay {
   position: absolute;
   top: 0;
@@ -71,8 +59,7 @@ html, body {
   pointer-events: none;
   background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px);
   background-size: 10px 10px;
-  opacity: 0;
-  transition: opacity 0.5s ease-in-out;
+  opacity: 0.5;
   z-index: 2;
 }
 
@@ -116,7 +103,7 @@ html, body {
 }
 
 .effect-item.active .effect-description {
-  max-height: 400px; /* increased for longer text */
+  max-height: 400px;
 }
 
 /* Mobile adjustments */
@@ -125,17 +112,10 @@ html, body {
     grid-template-columns: 1fr;
     gap: 16px;
     padding: 32px 16px;
-    height: auto;
   }
 
   .image-display {
     aspect-ratio: auto;
-    height: auto;
-  }
-
-  .image-display img {
-    position: relative; /* remove absolute for mobile */
-    width: 100%;
     height: auto;
   }
 
@@ -144,22 +124,13 @@ html, body {
     overflow: visible;
   }
 }
-
-@media (min-width: 1200px) {
-  .image-display {
-    max-width: 800px;
-    margin: auto;
-  }
-}
 </style>
 </head>
 
 <body>
-
 <div class="showcase">
   <div class="image-display">
-    <img id="oldImage" src="assets/images/chrome.png" alt="Old Image">
-    <img id="newImage" src="assets/images/chrome.png" alt="New Image">
+    <img src="assets/images/chrome.png" alt="Chrome">
     <div class="halftone-overlay"></div>
   </div>
 
@@ -196,76 +167,5 @@ html, body {
     </div>
   </div>
 </div>
-
-<script>
-const items = Array.from(document.querySelectorAll('.effect-item'));
-const oldImage = document.getElementById('oldImage');
-const newImage = document.getElementById('newImage');
-const halftone = document.querySelector('.halftone-overlay');
-
-let currentIndex = 0;
-let transitioning = false;
-
-// Function to send height to parent iframe
-function sendHeight() {
-  if(window.parent) {
-    window.parent.postMessage({ iframeHeight: document.body.scrollHeight }, '*');
-  }
-}
-
-// Handle image wipe and text expansion
-items.forEach((item, index) => {
-  item.addEventListener('click', () => {
-    if (item.classList.contains('active') || transitioning) return;
-    transitioning = true;
-
-    items.forEach(i => i.classList.remove('active'));
-    item.classList.add('active');
-
-    const newSrc = item.dataset.image;
-    const direction = index > currentIndex ? 1 : -1;
-
-    // Load new image
-    newImage.src = newSrc;
-
-    oldImage.style.clipPath = 'inset(0 0 0 0)';
-    newImage.style.transform = 'scale(1.02)';
-    halftone.style.opacity = 1;
-
-    requestAnimationFrame(() => {
-      oldImage.style.transition = 'clip-path 0.4s ease-in-out';
-      oldImage.style.clipPath = direction === 1 ? 'inset(0 100% 0 0)' : 'inset(0 0 0 100%)';
-    });
-
-    setTimeout(() => {
-      oldImage.src = newSrc;
-      oldImage.style.clipPath = 'inset(0 0 0 0)';
-      oldImage.style.transition = '';
-      newImage.style.transform = 'scale(1)';
-      halftone.style.opacity = 0;
-      currentIndex = index;
-
-      sendHeight();
-      transitioning = false;
-    }, 450); 
-  });
-});
-
-// Send height on load and resize
-window.addEventListener('load', sendHeight);
-window.addEventListener('resize', sendHeight);
-
-// After all images loaded
-const images = document.querySelectorAll('img');
-let loadedCount = 0;
-images.forEach(img => {
-  if(img.complete) loadedCount++;
-  else img.addEventListener('load', () => {
-    loadedCount++;
-    if(loadedCount === images.length) sendHeight();
-  });
-});
-</script>
-
 </body>
 </html>
