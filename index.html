@@ -37,6 +37,7 @@
     }
   }
 
+  /* Image container */
   .image-display {
     position: relative;
     width: 100%;
@@ -48,13 +49,28 @@
   }
 
   .image-display img {
-    position: absolute;
-    top: 0;
-    left: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.35s ease-in-out, box-shadow 0.35s ease, scale 0.35s ease;
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    transition: transform 0.35s ease-in-out;
+    z-index: 0;
+  }
+
+  /* Wipe overlay for sliding effect */
+  .image-display::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0%;
+    height: 100%;
+    background: #111;
+    z-index: 1;
+    transition: width 0.35s ease-in-out;
   }
 
   /* Halftone overlay */
@@ -69,15 +85,10 @@
     background-size: 10px 10px;
     opacity: 0;
     transition: opacity 0.5s ease-in-out;
-    z-index: 1;
+    z-index: 2;
   }
 
-  /* 3D slide effect */
-  .image-slide-active {
-    transform: scale(1.02);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.6);
-  }
-
+  /* Effects list */
   .effects-list {
     display: flex;
     flex-direction: column;
@@ -120,6 +131,12 @@
     max-height: 200px;
   }
 
+  /* Optional scaling/3D pop effect */
+  .pop {
+    transform: scale(1.02);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+  }
+
   @media (max-width: 767px) {
     .showcase {
       padding: 32px 16px;
@@ -140,8 +157,7 @@
 
 <div class="showcase">
   <div class="image-display">
-    <img id="currentImage" src="assets/images/chrome.png" alt="Effect Detail" loading="eager" decoding="async">
-    <img id="nextImage" src="" alt="" style="display: none;">
+    <img id="mainImage" src="assets/images/chrome.png" alt="Effect Detail" loading="eager" decoding="async">
     <div class="halftone-overlay"></div>
   </div>
 
@@ -184,60 +200,48 @@
 </div>
 
 <script>
-  const items = Array.from(document.querySelectorAll('.effect-item'));
-  const currentImage = document.getElementById('currentImage');
-  const nextImage = document.getElementById('nextImage');
-  const halftone = document.querySelector('.halftone-overlay');
+const items = Array.from(document.querySelectorAll('.effect-item'));
+const mainImage = document.getElementById('mainImage');
+const halftone = document.querySelector('.halftone-overlay');
+const overlay = document.querySelector('.image-display::before'); // pseudo-element
 
-  let transitioning = false;
-  let currentIndex = 0;
+let currentIndex = 0;
+let transitioning = false;
 
-  items.forEach((item, index) => {
-    item.addEventListener('click', () => {
-      if (item.classList.contains('active') || transitioning) return;
-      transitioning = true;
+items.forEach((item, index) => {
+  item.addEventListener('click', () => {
+    if (item.classList.contains('active') || transitioning) return;
+    transitioning = true;
 
-      items.forEach(i => i.classList.remove('active'));
-      item.classList.add('active');
+    items.forEach(i => i.classList.remove('active'));
+    item.classList.add('active');
 
-      const newSrc = item.dataset.image;
-      const direction = index > currentIndex ? 1 : -1;
+    const newSrc = item.dataset.image;
+    const direction = index > currentIndex ? 1 : -1;
 
-      nextImage.src = newSrc;
-      nextImage.style.display = 'block';
+    // Apply pop effect & halftone
+    mainImage.classList.add('pop');
+    halftone.style.opacity = 1;
 
-      // Position next image
-      nextImage.style.transform = `translateX(${100 * direction}%)`;
-      currentImage.style.transform = 'translateX(0)';
+    // Create sliding effect using transform
+    mainImage.style.transform = `translateX(${100 * direction}%) scale(1.02)`;
 
-      // Fade in halftone
-      halftone.style.opacity = 1;
-
-      // Apply 3D slide effect
-      currentImage.classList.add('image-slide-active');
-      nextImage.classList.add('image-slide-active');
-
-      // Trigger slide
-      requestAnimationFrame(() => {
-        currentImage.style.transform = `translateX(${-100 * direction}%) scale(1)`;
-        nextImage.style.transform = `translateX(0) scale(1)`;
-      });
-
-      setTimeout(() => {
-        currentImage.src = newSrc;
-        currentImage.style.transform = 'translateX(0)';
-        nextImage.style.display = 'none';
-        currentImage.classList.remove('image-slide-active');
-        nextImage.classList.remove('image-slide-active');
-
-        // Fade out halftone
-        halftone.style.opacity = 0;
-
-        currentIndex = index;
-        transitioning = false;
-      }, 350); // matches CSS transition
+    // Delay slightly for smooth animation
+    requestAnimationFrame(() => {
+      mainImage.style.transition = 'transform 0.35s ease-in-out';
+      mainImage.style.transform = 'translateX(0) scale(1)';
     });
+
+    setTimeout(() => {
+      mainImage.src = newSrc;
+      mainImage.style.transform = 'translateX(0) scale(1)';
+      mainImage.classList.remove('pop');
+      halftone.style.opacity = 0;
+      currentIndex = index;
+      transitioning = false;
+    }, 350);
   });
+});
 </script>
 
 </body>
